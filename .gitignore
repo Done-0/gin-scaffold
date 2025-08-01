@@ -1,0 +1,18 @@
+# 忽略 .logs 目录
+.logs/
+
+# 忽略 tmp 目录
+tmp/
+
+# 忽略 .history 文件
+.history
+
+# 忽略 .vscode 和 .idea 
+.vscode/
+.idea/
+
+# 忽略配置文件
+configs/configs.yaml
+
+# 忽略数据库文件
+/database/
