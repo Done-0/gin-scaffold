@@ -1,0 +1,31 @@
+# 应用相关
+APP:
+  APP_NAME: "METAPHYSICS"
+  APP_HOST: "127.0.0.1" # 如果使用 docker，则改为"0.0.0.0"
+  APP_PORT: "8080"
+
+# 数据库相关
+DATABASE:
+  DB_DIALECT: "postgres" # 数据库类型, 可选值: postgres, mysql, sqlite
+  DB_NAME: "metaphysics_db"
+  DB_HOST: "127.0.0.1" # 如果使用 docker，则改为"postgres_db"
+  DB_PORT: "5432"
+  DB_USER: "root"
+  DB_PSW: "123456"
+  DB_PATH: "./database" # SQLite 数据库文件路径
+
+# Redis 相关
+REDIS:
+  REDIS_HOST: "127.0.0.1" # 如果使用 docker，则改为"redis_db"
+  REDIS_PORT: "6379"
+  REDIS_PSW: ""
+  REDIS_DB: "0"
+
+# 日志相关
+LOG:
+  LOG_FILE_PATH: ".logs/"
+  LOG_FILE_NAME: "app.log"
+  LOG_TIMESTAMP_FMT: "2006-01-02 15:04:05"
+  LOG_MAX_AGE: 72
+  LOG_ROTATION_TIME: 24
+  LOG_LEVEL: "INFO"
