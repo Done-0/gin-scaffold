@@ -6,7 +6,6 @@ package global
 import (
 	"io"
 
-	"github.com/casbin/casbin/v2"
 	"github.com/redis/go-redis/v9"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
@@ -27,9 +26,4 @@ var (
 	SysLog  *logrus.Logger // 全局系统级日志对象，用于记录系统级日志
 	BizLog  *logrus.Entry  // 全局业务级日志对象，用于记录业务级日志
 	LogFile io.Closer      // 全局日志文件对象，用于日志文件资源管理
-)
-
-// 权限相关全局变量
-var (
-	Enforcer *casbin.Enforcer
 )
