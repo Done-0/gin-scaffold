@@ -9,9 +9,9 @@ import (
 	"github.com/Done-0/gin-scaffold/pkg/router/routes"
 )
 
-// New @title		Metaphysics API
+// New @title		Gin Scaffold API
 // @version			1.0
-// @description		This is the API documentation for Metaphysics.
+// @description		This is the API documentation for gin-scaffold.
 // @host			localhost:8080
 // @BasePath		/
 // @securityDefinitions.apikey BearerAuth

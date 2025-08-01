@@ -31,11 +31,11 @@ func TestPing(c *gin.Context) {
 // @Tags test
 // @Accept json
 // @Produce plain
-// @Success 200 {string} string "Hello, metaphysics 🎉!"
+// @Success 200 {string} string "Hello, gin-scaffold 🎉!"
 // @Router /test/testHello [get]
 func TestHello(c *gin.Context) {
-	utils.BizLogger(c).Info("Hello, metaphysics!")
-	c.String(http.StatusOK, "Hello, metaphysics 🎉!\n")
+	utils.BizLogger(c).Info("Hello, gin-scaffold!")
+	c.String(http.StatusOK, "Hello, gin-scaffold! 🎉!\n")
 }
 
 // TestLogger godoc
@@ -61,7 +61,7 @@ func TestLogger(c *gin.Context) {
 // @Router /test/testRedis [get]
 func TestRedis(c *gin.Context) {
 	utils.BizLogger(c).Info("开始写入缓存...")
-	err := global.RedisClient.Set(c.Request.Context(), "TEST:", "测试value", 0).Err()
+	err := global.RedisClient.Set(c.Request.Context(), "TEST:", "测试 value", 0).Err()
 	if err != nil {
 		utils.BizLogger(c).Error("测试写入缓存失败:", err)
 		c.AbortWithError(http.StatusInternalServerError, err)

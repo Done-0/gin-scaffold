@@ -1,13 +1,13 @@
 # 应用相关
 APP:
-  APP_NAME: "METAPHYSICS"
+  APP_NAME: "GIN_SCAFFOLD" # 应用名称
   APP_HOST: "127.0.0.1" # 如果使用 docker，则改为"0.0.0.0"
   APP_PORT: "8080"
 
 # 数据库相关
 DATABASE:
   DB_DIALECT: "postgres" # 数据库类型, 可选值: postgres, mysql, sqlite
-  DB_NAME: "metaphysics_db"
+  DB_NAME: "gin_scaffold_db"
   DB_HOST: "127.0.0.1" # 如果使用 docker，则改为"postgres_db"
   DB_PORT: "5432"
   DB_USER: "root"

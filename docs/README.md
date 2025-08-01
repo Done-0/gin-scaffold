@@ -40,7 +40,7 @@
    - 请求参数：无
    - 响应示例：
    ```text
-   Hello, metaphysics 🎉!
+   Hello, gin-scaffold! 🎉!
    ```
 3. **testLogger** 测试接口
    - 请求方式：GET
