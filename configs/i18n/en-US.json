@@ -1,0 +1,10 @@
+{
+  "10001": "internal server error: {{.msg}}",
+  "10002": "invalid parameter: {{.msg}}",
+  "10003": "unauthorized access: {{.msg}}",
+  "10004": "permission denied: {{.resource}}",
+  "10005": "{{.resource}} not found: {{.id}}",
+  "10006": "{{.resource}} already exists: {{.id}}",
+  "10007": "too many requests: {{.limit}} per {{.period}}",
+  "10008": "service unavailable: {{.service}}"
+}

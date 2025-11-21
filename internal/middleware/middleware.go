@@ -1,38 +1,27 @@
-// Package middleware 提供中间件集成和初始化功能
-// 创建者：Done-0
-// 创建时间：2025-07-01
+// Package middleware provides common middleware functionality
+// Author: Done-0
+// Created: 2025-09-25
 package middleware
 
 import (
-	"github.com/gin-contrib/gzip"
 	"github.com/gin-contrib/requestid"
 	"github.com/gin-gonic/gin"
 
+	"github.com/Done-0/gin-scaffold/configs"
 	"github.com/Done-0/gin-scaffold/internal/middleware/cors"
-	"github.com/Done-0/gin-scaffold/internal/middleware/recovery"
-	"github.com/Done-0/gin-scaffold/internal/middleware/secure"
 )
 
-// New 初始化并注册所有中间件
-// 参数：
-//
-//	app: Gin 实例
-func New(app *gin.Engine) {
-	// 全局请求 ID 中间件
-	app.Use(requestid.New())
+// New registers all middleware to the Gin engine
+func New(r *gin.Engine, config *configs.Config) {
+	// Recovery middleware (should be first)
+	r.Use(gin.Recovery())
 
-	// 日志中间件
-	app.Use(gin.Logger())
+	// Request ID middleware
+	r.Use(requestid.New())
 
-	// COR 跨域中间件
-	app.Use(cors.New())
+	// CORS middleware
+	r.Use(cors.New(config))
 
-	// Gzip 压缩中间件
-	app.Use(gzip.Gzip(gzip.DefaultCompression))
-
-	// 安全中间件
-	app.Use(secure.New())
-
-	// Recovery 中间件
-	app.Use(recovery.New())
+	// Logger middleware
+	r.Use(gin.Logger())
 }

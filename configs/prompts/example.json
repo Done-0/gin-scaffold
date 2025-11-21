@@ -1,0 +1,19 @@
+{
+  "name": "example",
+  "description": "演示变量替换，system 和 user 角色都传递变量的问候示例。",
+  "variables": {
+    "user_name": "用户姓名",
+    "greet_time": "问候时间",
+    "user_message": "用户输入内容"
+  },
+  "messages": [
+    {
+      "role": "system",
+      "content": "你好，{{.user_name}}！现在是{{.greet_time}}，欢迎来到AI助手。"
+    },
+    {
+      "role": "user",
+      "content": "{{.user_message}}"
+    }
+  ]
+}

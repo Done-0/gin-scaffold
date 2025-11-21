@@ -1,73 +1,23 @@
-// Package redis 提供Redis连接和管理功能
-// 创建者：Done-0
-// 创建时间：2025-07-01
+// Package redis provides Redis connection and management functionality
+// Author: Done-0
+// Created: 2025-09-25
 package redis
 
 import (
-	"context"
-	"fmt"
-	"log"
-	"runtime"
-	"strconv"
-	"time"
-
 	"github.com/redis/go-redis/v9"
 
 	"github.com/Done-0/gin-scaffold/configs"
-	"github.com/Done-0/gin-scaffold/internal/global"
+	"github.com/Done-0/gin-scaffold/internal/redis/internal"
 )
 
-// New 初始化Redis连接
-// 参数：
-//
-//	config: 应用配置
-func New(config *configs.Config) {
-	client := newRedisClient(config)
-	if err := client.Ping(context.Background()).Err(); err != nil {
-		log.Printf("Redis 连接失败: %v", err)
-		global.SysLog.Errorf("Redis 连接失败: %v", err)
-		return
-	}
-	global.RedisClient = client
-	log.Println("Redis 连接成功...")
-	global.SysLog.Infof("Redis 连接成功...")
+// RedisManager defines the interface for Redis management operations
+type RedisManager interface {
+	Client() *redis.Client
+	Initialize() error
+	Close() error
 }
 
-// Close 关闭Redis连接
-// 返回值：
-//
-//	error: 错误信息
-func Close() error {
-	if global.RedisClient == nil {
-		return nil
-	}
-
-	if err := global.RedisClient.Close(); err != nil {
-		return fmt.Errorf("关闭 Redis 连接失败: %w", err)
-	}
-
-	global.SysLog.Info("Redis 连接已关闭")
-	return nil
-}
-
-// newRedisClient 创建新的Redis客户端
-// 参数：
-//
-//	config: 应用配置
-//
-// 返回值：
-//
-//	*redis.Client: Redis客户端实例
-func newRedisClient(config *configs.Config) *redis.Client {
-	db, _ := strconv.Atoi(config.RedisConfig.RedisDB)
-	return redis.NewClient(&redis.Options{
-		Addr:         fmt.Sprintf("%s:%s", config.RedisConfig.RedisHost, config.RedisConfig.RedisPort),
-		Password:     config.RedisConfig.RedisPassword, // 数据库密码，默认为空字符串
-		DB:           db,                               // 数据库索引
-		DialTimeout:  10 * time.Second,                 // 连接超时时间
-		ReadTimeout:  1 * time.Second,                  // 读超时时间
-		WriteTimeout: 2 * time.Second,                  // 写超时时间
-		PoolSize:     runtime.GOMAXPROCS(10),           // 最大连接池大小
-		MinIdleConns: 50,                               // 最小空闲连接数
-	})
+// New creates a new Redis manager instance
+func New(config *configs.Config) (RedisManager, error) {
+	return internal.NewManager(config)
 }

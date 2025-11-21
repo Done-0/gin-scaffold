@@ -1,6 +1,6 @@
-// Package base 提供基础模型定义和通用数据库操作方法
-// 创建者：Done-0
-// 创建时间：2025-07-01
+// Package base provides base model definitions and common database operations
+// Author: Done-0
+// Created: 2025-09-25
 package base
 
 import (
@@ -11,85 +11,56 @@ import (
 
 	"gorm.io/gorm"
 
-	"github.com/Done-0/gin-scaffold/internal/utils"
+	"github.com/Done-0/gin-scaffold/internal/utils/snowflake"
 )
 
-// Base 包含模型通用字段
+// Base contains common model fields
 type Base struct {
-	ID          int64   `gorm:"primaryKey;type:bigint" json:"id"`          // 主键（snowflake）
-	GmtCreated  int64   `gorm:"type:bigint" json:"gmt_created"`            // 创建时间
-	GmtModified int64   `gorm:"type:bigint" json:"gmt_modified"`           // 更新时间
-	Ext         JSONMap `gorm:"type:json" json:"ext"`                      // 扩展字段
-	Deleted     bool    `gorm:"type:boolean;default:false" json:"deleted"` // 逻辑删除
+	ID        int64   `gorm:"primaryKey;type:bigint" json:"id"`          // Primary key (snowflake)
+	CreatedAt int64   `gorm:"type:bigint" json:"created_at"`             // Creation timestamp
+	UpdatedAt int64   `gorm:"type:bigint" json:"updated_at"`             // Update timestamp
+	Ext       JSONMap `gorm:"type:json" json:"ext"`                      // Extension fields
+	Deleted   bool    `gorm:"type:boolean;default:false" json:"deleted"` // Soft delete flag
 }
 
-// JSONMap 处理 JSON 类型字段
+// JSONMap handles JSON type fields
 type JSONMap map[string]any
 
-// Scan 从数据库读取 JSON 数据
-// 参数：
-//
-//	value: 数据库返回的值
-//
-// 返回值：
-//
-//	error: 操作过程中的错误
+// Scan implements sql.Scanner interface
 func (j *JSONMap) Scan(value any) error {
-	bytes, ok := value.([]byte)
-	if !ok {
-		return errors.New("数据类型错误，无法转换为 []byte 类型")
-	}
-	return json.Unmarshal(bytes, j)
-}
-
-// Value 将 JSONMap 转换为 JSON 数据存储到数据库
-// 返回值：
-//
-//	driver.Value: 数据库驱动值
-//	error: 操作过程中的错误
-func (j JSONMap) Value() (driver.Value, error) {
-	if j == nil {
-		return "{}", nil
-	}
-	return json.Marshal(j)
-}
-
-// BeforeCreate 创建前设置时间戳和 ID
-// 参数：
-//
-//	db: GORM数据库连接
-//
-// 返回值：
-//
-//	error: 操作过程中的错误
-func (m *Base) BeforeCreate(db *gorm.DB) error {
-	now := time.Now().Unix()
-	m.GmtCreated = now
-	m.GmtModified = now
-
-	// 生成雪花算法 ID
-	id, err := utils.GenerateID()
-	if err != nil {
-		return err
-	}
-	m.ID = id
-
-	// 只有当Ext为nil时才初始化，避免覆盖已设置的数据
-	if m.Ext == nil {
-		m.Ext = make(map[string]any)
+	switch v := value.(type) {
+	case nil:
+		*j = make(JSONMap)
+	case []byte:
+		return json.Unmarshal(v, j)
+	default:
+		return errors.New("cannot scan into JSONMap")
 	}
 	return nil
 }
 
-// BeforeUpdate 更新前更新修改时间
-// 参数：
-//
-//	db: GORM数据库连接
-//
-// 返回值：
-//
-//	error: 操作过程中的错误
+// Value implements driver.Valuer interface
+func (j JSONMap) Value() (driver.Value, error) {
+	return json.Marshal(j)
+}
+
+// BeforeCreate implements GORM hook
+func (m *Base) BeforeCreate(db *gorm.DB) error {
+	if m.ID != 0 {
+		return nil
+	}
+
+	now := time.Now().Unix()
+	m.CreatedAt = now
+	m.UpdatedAt = now
+
+	var err error
+	m.ID, err = snowflake.GenerateID()
+	return err
+}
+
+// BeforeUpdate implements GORM hook
 func (m *Base) BeforeUpdate(db *gorm.DB) error {
-	m.GmtModified = time.Now().Unix()
+	m.UpdatedAt = time.Now().Unix()
 	return nil
 }

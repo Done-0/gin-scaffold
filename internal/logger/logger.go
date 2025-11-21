@@ -1,90 +1,23 @@
-// Package logger 提供应用程序日志功能的初始化和配置
-// 创建者：Done-0
-// 创建时间：2025-07-01
+// Package logger provides application logging functionality initialization and configuration
+// Author: Done-0
+// Created: 2025-09-25
 package logger
 
 import (
-	"io"
-	"log"
-	"os"
-	"path"
-	"time"
-
-	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
-	"github.com/rifflock/lfshook"
 	"github.com/sirupsen/logrus"
 
 	"github.com/Done-0/gin-scaffold/configs"
-	"github.com/Done-0/gin-scaffold/internal/global"
+	"github.com/Done-0/gin-scaffold/internal/logger/internal"
 )
 
-// New 初始化日志组件
-// 参数：
-//
-//	config: 配置信息
-func New(config *configs.Config) {
-	logFilePath := config.LogConfig.LogFilePath
-	logFileName := config.LogConfig.LogFileName
-	fileName := path.Join(logFilePath, logFileName)
-	_ = os.MkdirAll(logFilePath, 0755)
+// LoggerManager defines the interface for logger management operations
+type LoggerManager interface {
+	Logger() *logrus.Logger
+	Initialize() error
+	Close() error
+}
 
-	// 初始化 logger
-	formatter := &logrus.JSONFormatter{TimestampFormat: config.LogConfig.LogTimestampFmt}
-	logger := logrus.New()
-	logger.SetFormatter(formatter)
-	logger.SetOutput(io.Discard)
-
-	// 设置日志级别
-	logLevel, err := logrus.ParseLevel(config.LogConfig.LogLevel)
-	switch err {
-	case nil:
-		logger.SetLevel(logLevel)
-	default:
-		logger.SetLevel(logrus.InfoLevel)
-	}
-
-	// 配置日志轮转
-	writer, err := rotatelogs.New(
-		path.Join(logFilePath, "%Y%m%d.log"),
-		rotatelogs.WithLinkName(fileName),
-		rotatelogs.WithMaxAge(time.Duration(config.LogConfig.LogMaxAge)*time.Hour),
-		rotatelogs.WithRotationTime(time.Duration(config.LogConfig.LogRotationTime)*time.Hour),
-	)
-
-	switch {
-	case err != nil:
-		log.Printf("配置日志轮转失败: %v，使用标准文件", err)
-		fileHandle, fileErr := os.OpenFile(fileName, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0755)
-
-		switch {
-		case fileErr != nil:
-			log.Printf("创建日志文件失败: %v，使用标准输出", fileErr)
-			logger.SetOutput(os.Stdout)
-			global.LogFile = nil
-		default:
-			logger.SetOutput(fileHandle)
-			global.LogFile = fileHandle
-		}
-	default:
-		allLevels := []logrus.Level{
-			logrus.PanicLevel,
-			logrus.FatalLevel,
-			logrus.ErrorLevel,
-			logrus.WarnLevel,
-			logrus.InfoLevel,
-			logrus.DebugLevel,
-			logrus.TraceLevel,
-		}
-
-		writeMap := make(lfshook.WriterMap, len(allLevels))
-		for _, level := range allLevels {
-			writeMap[level] = writer
-		}
-
-		logger.AddHook(lfshook.NewHook(writeMap, formatter))
-
-		global.LogFile = writer
-	}
-
-	global.SysLog = logger
+// New creates a new logger manager instance
+func New(config *configs.Config) (LoggerManager, error) {
+	return internal.NewManager(config)
 }

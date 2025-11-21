@@ -1,11 +1,15 @@
-// Package model 提供应用程序的数据模型定义和聚合
-// 创建者：Done-0
-// 创建时间：2025-07-01
+// Package model provides database model definitions and management
+// Author: Done-0
+// Created: 2025-08-24
 package model
 
-// GetAllModels 获取并注册所有模型
-// 返回值：
-//   - []any: 所有需要注册到数据库的模型列表
+import (
+	"github.com/Done-0/gin-scaffold/internal/model/user"
+)
+
+// GetAllModels gets and registers all models for database migration
 func GetAllModels() []any {
-	return []any{}
+	return []any{
+		&user.User{}, // User model
+	}
 }

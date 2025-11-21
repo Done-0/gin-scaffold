@@ -1,31 +1,23 @@
-// Package router 提供应用程序路由注册功能
-// 创建者：Done-0
-// 创建时间：2025-07-01
+// Package router provides application route registration functionality
+// Author: Done-0
+// Created: 2025-09-25
 package router
 
 import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/Done-0/gin-scaffold/pkg/router/routes"
+	"github.com/Done-0/gin-scaffold/pkg/wire"
 )
 
-// New @title		Gin Scaffold API
-// @version			1.0
-// @description		This is the API documentation for gin-scaffold.
-// @host			localhost:8080
-// @BasePath		/
-// @securityDefinitions.apikey BearerAuth
-// @in header
-// @name Authorization
-// @description 输入格式: Bearer {token}
-// New 函数用于注册应用程序的路由
-// 参数：
-//   - app: Gin 实例
-func New(app *gin.Engine) {
-	// 创建多版本 API 路由组
-	api1 := app.Group("/api/v1")
-	api2 := app.Group("/api/v2")
+// New registers application routes
+func New(r *gin.Engine, container *wire.Container) {
+	// Create API v1 route group
+	v1 := r.Group("/api/v1")
 
-	// 注册测试相关的路由
-	routes.RegisterTestRoutes(api1, api2)
+	// Create API v2 route group
+	v2 := r.Group("/api/v2")
+
+	// Register routes by modules
+	routes.RegisterTestRoutes(container, v1, v2)
 }
