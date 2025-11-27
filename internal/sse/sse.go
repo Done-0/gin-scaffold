@@ -11,8 +11,8 @@ import (
 	"github.com/Done-0/gin-scaffold/internal/sse/internal"
 )
 
-// Manager defines SSE operations
-type Manager interface {
+// SSEManager defines SSE operations
+type SSEManager interface {
 	StreamToClient(c *gin.Context, events <-chan *Event) error
 }
 
@@ -22,6 +22,6 @@ type (
 )
 
 // New creates SSE manager
-func New(config *configs.Config) Manager {
+func New(config *configs.Config) SSEManager {
 	return internal.NewManager(config)
 }

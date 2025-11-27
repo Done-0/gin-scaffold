@@ -20,11 +20,11 @@ import (
 // TestController test HTTP controller
 type TestController struct {
 	testService service.TestService
-	sseManager  sse.Manager
+	sseManager  sse.SSEManager
 }
 
 // NewTestController creates test controller
-func NewTestController(testService service.TestService, sseManager sse.Manager) *TestController {
+func NewTestController(testService service.TestService, sseManager sse.SSEManager) *TestController {
 	return &TestController{
 		testService: testService,
 		sseManager:  sseManager,

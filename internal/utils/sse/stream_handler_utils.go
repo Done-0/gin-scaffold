@@ -15,7 +15,7 @@ import (
 type Handler func(ctx context.Context, ch chan<- *sse.Event)
 
 // Stream processes data using a custom handler function
-func Stream(c *gin.Context, handler Handler, manager sse.Manager) error {
+func Stream(c *gin.Context, handler Handler, manager sse.SSEManager) error {
 	ch := make(chan *sse.Event, 100)
 
 	go func() {

@@ -64,7 +64,7 @@ type Container struct {
 	RedisManager    redis.RedisManager
 	LoggerManager   logger.LoggerManager
 	I18nManager     i18n.I18nManager
-	SSEManager      sse.Manager
+	SSEManager      sse.SSEManager
 
 	// Controllers
 	TestController *controller.TestController
