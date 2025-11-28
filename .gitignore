@@ -1,18 +1,32 @@
-# 忽略 .logs 目录
-.logs/
-
-# 忽略 tmp 目录
-tmp/
-
-# 忽略 .history 文件
+# Claude
+.claude/
 .history
 
-# 忽略 .vscode 和 .idea 
+# Env
+.env
+
+# Project
+.logs/
+tmp/
+/database/
+configs/configs.yaml
+
+# IDE
 .vscode/
 .idea/
 
-# 忽略配置文件
-configs/configs.yaml
+# Go
+*.exe
+*.test
+*.out
+*.so
+*.dylib
+*.a
+vendor/
+go.work
+go.work.sum
+__debug_bin
 
-# 忽略数据库文件
-/database/
+# OS
+.DS_Store
+Thumbs.db
