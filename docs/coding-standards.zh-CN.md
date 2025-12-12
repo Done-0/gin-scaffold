@@ -251,16 +251,16 @@ import (
 
 ```go
 import (
-	"fmt"
-	"net/http"
-	"runtime"
+    "fmt"
+    "net/http"
+    "runtime"
 
-	"github.com/gin-gonic/gin"
+    "github.com/gin-gonic/gin"
 
-	"github.com/Done-0/gin-scaffold/internal/global"
-	"github.com/Done-0/gin-scaffold/pkg/vo"
+    "github.com/Done-0/gin-scaffold/internal/global"
+    "github.com/Done-0/gin-scaffold/pkg/vo"
 
-	_ "github.com/go-sql-driver/mysql" // 匿名导入
+    _ "github.com/go-sql-driver/mysql" // 匿名导入
     customname "github.com/pkg/errors" // 别名导入
     . "github.com/alecthomas/kingpin/v2" // 点导入（第三方包）
 )

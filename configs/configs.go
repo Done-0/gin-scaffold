@@ -322,13 +322,20 @@ func UpdateField(updateFunc func(*Config)) error {
 					} else {
 						// Non-array type
 						old, new = fmt.Sprintf("%v", oldField.Interface()), fmt.Sprintf("%v", newField.Interface())
+						var newFormatted string
+						switch newField.Kind() {
+						case reflect.String:
+							newFormatted = fmt.Sprintf(`"%s"`, new)
+						default:
+							newFormatted = new
+						}
 						for _, pattern := range []string{
 							fmt.Sprintf(`%s: "%s"`, tag, old),
 							fmt.Sprintf(`%s: %s`, tag, old),
 							fmt.Sprintf(`%s: ""`, tag),
 						} {
 							if strings.Contains(newContent, pattern) {
-								newContent = strings.ReplaceAll(newContent, pattern, fmt.Sprintf(`%s: "%s"`, tag, new))
+								newContent = strings.ReplaceAll(newContent, pattern, fmt.Sprintf(`%s: %s`, tag, newFormatted))
 								break
 							}
 						}
