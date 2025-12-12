@@ -45,8 +45,8 @@ func TestManager(t *testing.T) {
 			Name:        "test_template",
 			Description: "test description",
 			Messages: []Message{
-				{Role: "system", Content: "You are {{role}} assistant"},
-				{Role: "user", Content: "{{message}}"},
+				{Role: "system", Content: "You are {{.role}} assistant"},
+				{Role: "user", Content: "{{.message}}"},
 			},
 		}
 
@@ -85,7 +85,7 @@ func TestManager(t *testing.T) {
 
 		t.Logf("Raw content: %s", raw.Messages[0].Content)
 
-		if raw.Messages[0].Content != "You are {{role}} assistant" {
+		if raw.Messages[0].Content != "You are {{.role}} assistant" {
 			t.Errorf("Raw template content incorrect, got: %s", raw.Messages[0].Content)
 		}
 		t.Logf("Raw template content preserved")
