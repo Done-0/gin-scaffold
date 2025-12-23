@@ -5,19 +5,19 @@ package internal
 
 import (
 	"github.com/Done-0/gin-scaffold/configs"
-	"github.com/Done-0/gin-scaffold/internal/ai/internal/prompt"
+	"github.com/Done-0/gin-scaffold/internal/ai/internal/prompter"
 	"github.com/Done-0/gin-scaffold/internal/ai/internal/provider"
 )
 
 type Manager struct {
 	provider.Provider
-	prompt.Manager
+	prompter.Prompter
 }
 
 // New creates a new AI provider manager with dynamic prompt loading
 func New(config *configs.Config) (*Manager, error) {
 	return &Manager{
 		Provider: provider.New(),
-		Manager:  prompt.New(),
+		Prompter: prompter.New(),
 	}, nil
 }

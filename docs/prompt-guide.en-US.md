@@ -1,6 +1,6 @@
 # Prompt Writing Guide
 
-> Based on actual implementation in `internal/ai/internal/prompt` and `internal/utils/template`
+> Based on actual implementation in `internal/ai/internal/prompter` and `internal/utils/template`
 
 ---
 
@@ -50,10 +50,10 @@ type Message struct {
 
 | Field | Type | Required | Constraint |
 |-------|------|----------|------------|
-| `name` | string | Yes | Cannot be empty (manager.go:85) |
+| `name` | string | Yes | Cannot be empty |
 | `description` | string | No | - |
 | `variables` | map[string]string | No | - |
-| `messages` | []Message | Yes | At least one (manager.go:89) |
+| `messages` | []Message | Yes | At least one |
 
 ---
 
@@ -88,66 +88,130 @@ type Message struct {
 {{unixToTime 1706140800}}      // returns "2025年01月24日 15时30分"
 ```
 
-Definition: `template.go:25-32`
-
 ---
 
-## V. Manager Interface
+## V. Prompter Interface
 
 ```go
-type Manager interface {
-    GetTemplate(ctx, name, vars) (*Template, error)
-    ListTemplates(ctx) ([]string, error)
-    CreateTemplate(ctx, template) error
-    UpdateTemplate(ctx, name, template) error
-    DeleteTemplate(ctx, name) error
+type Prompter interface {
+    GetTemplate(ctx, path, vars) (*Template, error)
+    ListTemplates(ctx, prefix) ([]string, error)
+    CreateTemplate(ctx, path, tmpl) error
+    UpdateTemplate(ctx, path, tmpl) error
+    DeleteTemplate(ctx, path) error
 }
 ```
 
 ### 1. GetTemplate
 
 ```go
-func (m *manager) GetTemplate(ctx context.Context, name string, vars *map[string]any) (*Template, error)
+func (p *prompter) GetTemplate(ctx context.Context, path string, vars *map[string]any) (*Template, error)
 ```
 
-Behavior (manager.go:24-59):
-- `vars == nil` → returns raw template (lines 36-38)
-- `vars != nil` → returns template with replaced variables (lines 47-56)
+Behavior:
+- `path` parameter is the file path relative to prompts directory (without `.json` suffix)
+- `vars == nil` → returns raw template
+- `vars != nil` → returns template with replaced variables
+- The `name` field inside JSON is purely descriptive metadata, does not affect lookup
 
 Example:
 ```go
-// Raw template
-raw, _ := mgr.GetTemplate(ctx, "test", nil)
+// configs/prompts/test.json
+raw, _ := p.GetTemplate(ctx, "test", nil)
+
+// configs/prompts/character/character_generator.json
+tmpl, _ := p.GetTemplate(ctx, "character/character_generator", nil)
+
+// configs/prompts/stories/horror/elevator_game.json
+tmpl, _ := p.GetTemplate(ctx, "stories/horror/elevator_game", nil)
 
 // With variable replacement
 vars := map[string]any{"name": "World"}
-rendered, _ := mgr.GetTemplate(ctx, "test", &vars)
+rendered, _ := p.GetTemplate(ctx, "test", &vars)
 ```
 
-### 2. CreateTemplate
+### 2. ListTemplates
 
-Constraints (manager.go:79-98):
-- `template.Name` cannot be empty (line 85)
-- `template.Messages` must have at least one (line 89)
-- File cannot already exist (line 94)
+```go
+func (p *prompter) ListTemplates(ctx context.Context, prefix string) ([]string, error)
+```
 
-### 3. UpdateTemplate
+Behavior:
+- `prefix == ""` → lists all templates
+- `prefix != ""` → lists only templates under specified directory
+- Returns relative paths without `.json` extension
 
-Constraints (manager.go:100-134):
-- `template.Name` cannot be empty (line 106)
-- Original file must exist (line 111)
-- When renaming, new name cannot already exist (line 117)
+Example:
+```go
+// List all templates
+names, _ := p.ListTemplates(ctx, "")
+// ["character_generator", "stories/midnight_store", "stories/horror/elevator_game"]
 
-### 4. ListTemplates
+// List only stories/horror directory
+names, _ := p.ListTemplates(ctx, "stories/horror")
+// ["stories/horror/elevator_game"]
+```
 
-Behavior (manager.go:61-77):
-- Lists `*.json` file names (line 67)
-- Returns list without extensions (line 74)
+### 3. CreateTemplate
+
+```go
+func (p *prompter) CreateTemplate(ctx context.Context, path string, tmpl *Template) error
+```
+
+Constraints:
+- `path` cannot be empty
+- `tmpl.Messages` must have at least one
+- File cannot already exist
+- Auto-creates intermediate directories
+- `tmpl.Name` is metadata only, can be named freely
+
+Example:
+```go
+tmpl := &prompt.Template{
+    Name:     "Midnight Store",  // Display name, can be anything
+    Messages: []prompt.Message{{Role: "system", Content: "..."}},
+}
+p.CreateTemplate(ctx, "stories/midnight_store", tmpl) // Path determines storage location
+```
+
+### 4. UpdateTemplate
+
+```go
+func (p *prompter) UpdateTemplate(ctx context.Context, path string, tmpl *Template) error
+```
+
+Constraints:
+- `path` cannot be empty
+- File must exist
+- Updates in place, does not support moving (use delete + create to move)
+
+Example:
+```go
+tmpl := &prompt.Template{
+    Name:     "Updated Name",  // Only updates metadata
+    Messages: []prompt.Message{{Role: "system", Content: "Updated content"}},
+}
+p.UpdateTemplate(ctx, "stories/midnight_store", tmpl)
+```
 
 ### 5. DeleteTemplate
 
-Behavior (manager.go:136-142):
-- Deletes `.json` file with specified name
+```go
+func (p *prompter) DeleteTemplate(ctx context.Context, path string) error
+```
+
+Behavior:
+- If file: deletes `{path}.json`
+- If directory: deletes entire directory and all contents
+
+Example:
+```go
+// Delete single file
+p.DeleteTemplate(ctx, "stories/midnight_store")
+
+// Delete entire directory
+p.DeleteTemplate(ctx, "stories") // Deletes stories/ and all sub-contents
+```
 
 ---
 
@@ -158,25 +222,25 @@ package main
 
 import (
     "context"
-    
+
     "github.com/Done-0/gin-scaffold/internal/ai/internal/prompt"
 )
 
 func main() {
-    mgr := prompt.New()
+    p := prompt.New()
     ctx := context.Background()
-    
+
     // Load and replace variables
     vars := map[string]any{
         "symbol": "BTC/USDT",
         "price": 66500.00,
     }
-    
-    tmpl, err := mgr.GetTemplate(ctx, "trading_analyzer", &vars)
+
+    tmpl, err := p.GetTemplate(ctx, "trading_analyzer", &vars)
     if err != nil {
         panic(err)
     }
-    
+
     // Use replaced content
     fmt.Println(tmpl.Messages[0].Content)
 }
@@ -184,12 +248,21 @@ func main() {
 
 ---
 
-## VII. File Naming
+## VII. File Structure
 
-- Location: `configs/prompts/`
-- Format: `{name}.json`
-- Naming: lowercase + underscore
-- Example: `bazi_analyzer.json`
+```
+configs/prompts/
+├── character_generator.json     # Root directory template
+├── stories/                     # Subdirectory
+│   ├── midnight_store.json
+│   └── horror/                  # Nested subdirectory
+│       └── elevator_game.json
+└── ...
+```
+
+- Location: specified by config `AI.Prompt.Dir`, default `configs/prompts/`
+- Format: `{path}.json`
+- Naming: lowercase + underscore, supports multi-level directories
 
 ---
 
@@ -197,7 +270,7 @@ func main() {
 
 ```json
 {
-  "name": "example",
+  "name": "stories/example",
   "description": "Example prompt",
   "variables": {
     "user_name": "User name",
@@ -215,4 +288,3 @@ func main() {
   ]
 }
 ```
-
