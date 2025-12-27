@@ -169,12 +169,13 @@ func (p *openAIProvider) ChatStream(ctx context.Context, req *ChatRequest) (<-ch
 	}
 
 	request := openai.ChatCompletionRequest{
-		Model:       model,
-		Messages:    messages,
-		Stream:      true,
-		MaxTokens:   p.config.MaxTokens,
-		Temperature: float32(p.config.Temperature),
-		TopP:        float32(p.config.TopP),
+		Model:         model,
+		Messages:      messages,
+		Stream:        true,
+		MaxTokens:     p.config.MaxTokens,
+		Temperature:   float32(p.config.Temperature),
+		TopP:          float32(p.config.TopP),
+		StreamOptions: &openai.StreamOptions{IncludeUsage: true},
 	}
 
 	var stream *openai.ChatCompletionStream
